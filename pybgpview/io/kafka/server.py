@@ -130,6 +130,7 @@ class Server:
         if self.pub_channel:
             path = METRIC_PATH + "." + str(self.pub_channel)
         key = "%s.%s.%s" % (self.metric_prefix, path, metric)
+        key = key.encode()
         idx = self.kp.get_key(key)
         if idx is None:
             idx = self.kp.add_key(key)
