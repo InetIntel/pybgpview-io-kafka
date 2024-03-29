@@ -361,7 +361,7 @@ class Server:
                                     member['parent_time'])
             parts.append(mmsg)
         parts.append(struct.pack("=q", last_sync_offset))
-        return msg + ''.join(parts)
+        return msg + b''.join(parts)
 
 
 def main():
