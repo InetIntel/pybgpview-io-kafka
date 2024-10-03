@@ -47,6 +47,7 @@ MEMBER_TIMEOUT_DEFAULT = 3600*2
 METRIC_PREFIX_DEFAULT = "bgp"
 METRIC_PATH = "meta.bgpview.server.kafka.channels"
 
+CONSUMER_GROUP_DEFAULT = "bgpview-server"
 
 class Server:
     """ Watches the members and metadata topics of a BGPView Kafka stream and
@@ -60,7 +61,8 @@ class Server:
                  pub_channel=None,
                  publication_timeout=PUBLICATION_TIMEOUT_DEFAULT,
                  member_timeout=MEMBER_TIMEOUT_DEFAULT,
-                 metric_prefix=METRIC_PREFIX_DEFAULT):
+                 metric_prefix=METRIC_PREFIX_DEFAULT,
+                 consumer_group=CONSUMER_GROUP_DEFAULT):
         self.brokers = brokers
         self.namespace = namespace
         self.pub_channel = pub_channel
@@ -69,6 +71,7 @@ class Server:
         self.metric_prefix = metric_prefix
         self.last_pub_time = 0
         self.last_sync_offset = -1
+        self.consumer_group = consumer_group
 
         # our active members
         self.members = dict()
@@ -94,11 +97,11 @@ class Server:
         self.kc = pykafka.KafkaClient(hosts=self.brokers)
         # set up our consumers
         self.md_consumer =\
-            self.topic(METADATA_TOPIC).get_simple_consumer(consumer_timeout_ms=10000)
+            self.topic(METADATA_TOPIC).get_simple_consumer(consumer_timeout_ms=10000, consumer_group=self.consumer_group)
         self.members_consumer =\
-            self.topic(MEMBERS_TOPIC).get_simple_consumer(consumer_timeout_ms=1000)
+            self.topic(MEMBERS_TOPIC).get_simple_consumer(consumer_timeout_ms=1000, consumer_group=self.consumer_group)
         self.gmd_consumer =\
-            self.topic(self.gmd_topic).get_simple_consumer(consumer_timeout_ms=1000)
+            self.topic(self.gmd_topic).get_simple_consumer(consumer_timeout_ms=1000, consumer_group=self.consumer_group)
         # and our producer
         self.gmd_producer =\
             self.topic(self.gmd_topic).get_sync_producer()
@@ -375,6 +378,9 @@ def main():
     parser.add_argument('-k',  '--timeseries-config',
                         nargs='?', required=True,
                         help='libtimeseries backend config')
+    parser.add_argument('-g',  '--consumer-group',
+                        nargs='?', required=False,
+                        help='consumer group to use when reading from kafka')
     parser.add_argument('-c', '--pub-channel',
                         nargs='?', required=False,
                         help='Channel to publish Global Metadata messages to')
