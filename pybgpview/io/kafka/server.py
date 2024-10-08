@@ -358,7 +358,7 @@ class Server:
                             member['pfxs_offset'],
                             member['peers_offset'],
                             member['type'])
-            if member['type'] == 'D':
+            if member['type'] == b'D':
                 mmsg += struct.pack("=QL",
                                     member['sync_md_offset'],
                                     member['parent_time'])
