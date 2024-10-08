@@ -216,7 +216,7 @@ class Server:
                            if m not in tv['collectors']]
                 logging.info("Published view at %d was missing data from: %s" %
                              (view_time, missing))
-            if tv['type'] == 'S':
+            if tv['type'] == b'S':
                 self.last_sync_offset = -1
             self.send_gmd_msg(view_time)
             del self.views[view_time]
@@ -269,7 +269,7 @@ class Server:
 
     def send_gmd_msg(self, view_time):
         tv = self.views[view_time]
-        if tv['type'] == 'S':
+        if tv['type'] == b'S':
             self.last_sync_offset = -1
         logging.info("Setting last sync offset: %d" % self.last_sync_offset)
         msg = self.serialize_gmd_msg(view_time,
@@ -278,7 +278,7 @@ class Server:
         self.gmd_producer.produce(msg)
         next_offset = self.topic(self.gmd_topic).\
             latest_available_offsets()[0][0][0]
-        if tv['type'] == 'S':
+        if tv['type'] == b'S':
             self.last_sync_offset = next_offset - 1
 
     def log_state(self):
@@ -333,7 +333,7 @@ class Server:
             'peers_offset': peers_offset,
             'type': type,
         }
-        if type == 'D':
+        if type == b'D':
             # there are an extra couple of fields in a diff message
             (sync_md_offset, parent_time) = struct.unpack("=QL", msg[2+msglen:])
             res['sync_md_offset'] = sync_md_offset
