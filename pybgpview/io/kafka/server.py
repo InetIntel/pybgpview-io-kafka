@@ -158,7 +158,7 @@ class Server:
         # now go through and evict any members that have a last-seen time older
         # than our timeout
         time_now = int(time.time())
-        for member in self.members.keys():
+        for member in list(self.members.keys()):
             if self.members[member] < (time_now - self.member_timeout):
                 logging.warn("Removing dead member %s. Last seen at %d" %
                              (member, self.members[member]))
